@@ -2,10 +2,20 @@
 #include "def.h"
 
 #include "src/ledmon.h"
+#include "src/button.h"
 
 //#include <WiFi.h>
 
 //------------------------------------------------------------------------------
+void btnClick() {
+    static int sig = 0;
+    
+    sig ++;
+
+    if (sig > 2) sig = 0;
+    ledMonSet(sig);
+}
+
 void setup() {
     //if (!pwrCheck())
     //    return;
@@ -13,7 +23,8 @@ void setup() {
     //WiFi.mode(WIFI_OFF);
 
     // инициируем кнопки
-    //btnInit();
+    btnInit();
+    btnHnd(BTN_SIMPLE, btnClick);
     
     ledMonInit();
 }
@@ -21,18 +32,9 @@ void setup() {
 //------------------------------------------------------------------------------
 void loop() {
     static uint32_t m = millis();
-    static uint32_t tm = 0;
-    static int sig = 0;
-
-    if (tm < millis()) {
-        tm += 16000;
-        sig ++;
-
-        if (sig > 2) sig = 0;
-        ledMonSet(sig);
-    }
 
     ledMonProcess();
+    btnProcess();
 
     uint32_t m1 = millis();
     while (m <= m1) m+=64; // делаем так, чтобы цикл стартовал каждые 64ms
