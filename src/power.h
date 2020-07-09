@@ -9,6 +9,7 @@
 
 bool pwrCheck();
 
-void pwrOff();
+void pwrOffBegin();
+void pwrOffProcess();
 
 #endif // _power_H

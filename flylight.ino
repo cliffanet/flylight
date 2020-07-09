@@ -8,17 +8,19 @@
 //#include <WiFi.h>
 
 //------------------------------------------------------------------------------
+void sigupd(bool _inc = true) {
+    static int sig = 0;
+
+    if (_inc) {
+      sig ++;
+      if (sig > 3) sig = 0;
+    }
+    
+    ledMonSet(LEDMON_OK3);
+}
+    
 void btnClick() {
-    //static int sig = 0;
-    
-    //sig ++;
-
-    //if (sig > 2) sig = 0;
-    //ledMonSet(sig);
-
-    digitalWrite(LEDMON_PIN, HIGH);
-    pwrOff();
-    
+    sigupd();
 }
 
 void setup() {
@@ -32,18 +34,16 @@ void setup() {
     // инициируем кнопки
     btnInit();
     btnHnd(BTN_SIMPLE, btnClick);
+    btnHnd(BTN_LONG, pwrOffBegin);
 }
 
 //------------------------------------------------------------------------------
 void loop() {
     static uint32_t m = millis();
 
-    static bool ison = false;
-    
-    digitalWrite(LEDMON_PIN, (ison = !ison) ? LOW : HIGH);
-
     ledMonProcess();
     btnProcess();
+    pwrOffProcess();
 
     uint32_t m1 = millis();
     while (m <= m1) m+=64; // делаем так, чтобы цикл стартовал каждые 64ms

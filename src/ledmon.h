@@ -9,6 +9,19 @@
 
 #define LEDMON_PIN      LED_BUILTIN
 
+typedef enum {
+    LEDMON_NONE = 0,
+    LEDMON_BLINK,
+    LEDMON_ON,
+    LEDMON_PWROFF,
+    LEDMON_OK1,
+    LEDMON_OK2,
+    LEDMON_OK3,
+    LEDMON_OK4,
+    LEDMON_OK6,
+    LEDMON_ERR2
+} ledmon_sig_t;
+
 void ledMonInit();
 void ledMonDisable();
 void ledMonSet(int sig);
