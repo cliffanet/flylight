@@ -1,6 +1,7 @@
 
 #include "def.h"
 
+#include "src/power.h"
 #include "src/ledmon.h"
 #include "src/button.h"
 
@@ -8,30 +9,38 @@
 
 //------------------------------------------------------------------------------
 void btnClick() {
-    static int sig = 0;
+    //static int sig = 0;
     
-    sig ++;
+    //sig ++;
 
-    if (sig > 2) sig = 0;
-    ledMonSet(sig);
+    //if (sig > 2) sig = 0;
+    //ledMonSet(sig);
+
+    digitalWrite(LEDMON_PIN, HIGH);
+    pwrOff();
+    
 }
 
 void setup() {
-    //if (!pwrCheck())
-    //    return;
+    if (!pwrCheck())
+        return;
   
     //WiFi.mode(WIFI_OFF);
+    
+    ledMonInit();
 
     // инициируем кнопки
     btnInit();
     btnHnd(BTN_SIMPLE, btnClick);
-    
-    ledMonInit();
 }
 
 //------------------------------------------------------------------------------
 void loop() {
     static uint32_t m = millis();
+
+    static bool ison = false;
+    
+    digitalWrite(LEDMON_PIN, (ison = !ison) ? LOW : HIGH);
 
     ledMonProcess();
     btnProcess();

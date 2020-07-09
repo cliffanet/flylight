@@ -17,9 +17,14 @@ static int sigcurr = 0;
 static uint32_t sigbeg = 0;
 
 void ledMonInit() {
-    digitalWrite(LEDMON_PIN, HIGH);
+    digitalWrite(LEDMON_PIN, LOW);
     pinMode(LEDMON_PIN, OUTPUT);
     sigcurr = 0;
+}
+
+void ledMonDisable() {
+    digitalWrite(LEDMON_PIN, HIGH);
+    pinMode(LEDMON_PIN, INPUT);
 }
 
 
@@ -29,7 +34,7 @@ void ledMonSet(int sig) {
 }
 
 void ledMonProcess() {
-    static bool ison = false;
+    static bool ison = true;
     
     if ((sigcurr < 1) || (sigcurr > (sizeof(sigall)/sizeof(sigall[0])))) {
         if (ison) {

@@ -10,6 +10,7 @@
 #define LEDMON_PIN      LED_BUILTIN
 
 void ledMonInit();
+void ledMonDisable();
 void ledMonSet(int sig);
 void ledMonProcess();
 
