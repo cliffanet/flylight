@@ -1,6 +1,7 @@
 
 #include "power.h"
 #include "ledmon.h"
+#include "ledExt.h"
 #include "button.h"
 
 /* ------------------------------------------------------------------------------------------- *
@@ -33,6 +34,7 @@ static bool rtcSave(uint8_t v) {
 
 static void hwOff() {
     ledMonDisable();
+    ledExtDisable();
     
     // перед тем, как уйти в сон окончательно, дождёмся отпускания кнопки питания
     while (digitalRead(BUTTON_PIN) == LOW)
@@ -121,9 +123,6 @@ static void pwrOffClick() {
     }
 }
 
-void btnClick();
-void sigupd(bool _inc = true);
-
 void pwrOffProcess() {
     if (offstate == 0)
         return;
@@ -166,9 +165,9 @@ void pwrOffProcess() {
                 // кнопка зажата слишком долго, завершаем процесс
                 offstate = 0;
                 offtm = 0;
-                btnHnd(BTN_SIMPLE, btnClick);
+                btnHnd(BTN_SIMPLE, ledExtNext);
                 btnHnd(BTN_LONG, pwrOffBegin);
-                sigupd(false);
+                // тут надо восстановить нужный режим моргания дежурного светодиода
             }
             return;
             

@@ -3,26 +3,12 @@
 
 #include "src/power.h"
 #include "src/ledmon.h"
+#include "src/ledext.h"
 #include "src/button.h"
 
 //#include <WiFi.h>
 
 //------------------------------------------------------------------------------
-void sigupd(bool _inc = true) {
-    static int sig = 0;
-
-    if (_inc) {
-      sig ++;
-      if (sig > 3) sig = 0;
-    }
-    
-    ledMonSet(LEDMON_OK3);
-}
-    
-void btnClick() {
-    sigupd();
-}
-
 void setup() {
     if (!pwrCheck())
         return;
@@ -30,10 +16,11 @@ void setup() {
     //WiFi.mode(WIFI_OFF);
     
     ledMonInit();
+    ledExtInit();
 
     // инициируем кнопки
     btnInit();
-    btnHnd(BTN_SIMPLE, btnClick);
+    btnHnd(BTN_SIMPLE, ledExtNext);
     btnHnd(BTN_LONG, pwrOffBegin);
 }
 
@@ -42,6 +29,7 @@ void loop() {
     static uint32_t m = millis();
 
     ledMonProcess();
+    ledExtProcess();
     btnProcess();
     pwrOffProcess();
 

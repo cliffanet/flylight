@@ -7,7 +7,7 @@
 
 #include "../def.h"
 
-#define LEDMON_PIN      LED_BUILTIN
+#define LEDMON_PIN      D4 /*LED_BUILTIN*/
 
 typedef enum {
     LEDMON_NONE = 0,
