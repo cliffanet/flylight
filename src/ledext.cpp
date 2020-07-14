@@ -20,13 +20,25 @@ static uint8_t ison = 0;
 void ledExtInit() {
     digitalWrite(LEDEXT_PIN_1, LOW);
     pinMode(LEDEXT_PIN_1, OUTPUT);
+    digitalWrite(LEDEXT_PIN_2, LOW);
+    pinMode(LEDEXT_PIN_2, OUTPUT);
+    digitalWrite(LEDEXT_PIN_3, LOW);
+    pinMode(LEDEXT_PIN_3, OUTPUT);
+    digitalWrite(LEDEXT_PIN_4, LOW);
+    pinMode(LEDEXT_PIN_4, OUTPUT);
     led = NULL;
     beg = 0;
 }
 
 void ledExtDisable() {
-    digitalWrite(LEDEXT_PIN_1, HIGH);
-    pinMode(LEDEXT_PIN_1, INPUT);
+    digitalWrite(LEDEXT_PIN_1, LOW);
+    //pinMode(LEDEXT_PIN_1, INPUT);
+    digitalWrite(LEDEXT_PIN_2, LOW);
+    //pinMode(LEDEXT_PIN_2, INPUT);
+    digitalWrite(LEDEXT_PIN_3, LOW);
+    //pinMode(LEDEXT_PIN_3, INPUT);
+    digitalWrite(LEDEXT_PIN_4, LOW);
+    //pinMode(LEDEXT_PIN_4, INPUT);
 }
 
 
@@ -53,14 +65,13 @@ static void setstate(uint8_t st) {
         return;
     
     if ((st & 0x8) != (ison & 0x8))
-        digitalWrite(LEDEXT_PIN_1, (st & 0x8) > 0 ? LOW : HIGH);
-    /*if ((st & 0x4) != (ison & 0x4))
-        digitalWrite(LEDEXT_PIN_2, (st & 0x4) > 0 ? LOW : HIGH);
+        digitalWrite(LEDEXT_PIN_1, (st & 0x8) > 0 ? HIGH : LOW);
+    if ((st & 0x4) != (ison & 0x4))
+        digitalWrite(LEDEXT_PIN_2, (st & 0x4) > 0 ? HIGH : LOW);
     if ((st & 0x2) != (ison & 0x2))
-        digitalWrite(LEDEXT_PIN_3, (st & 0x2) > 0 ? LOW : HIGH);
+        digitalWrite(LEDEXT_PIN_3, (st & 0x2) > 0 ? HIGH : LOW);
     if ((st & 0x1) != (ison & 0x1))
-        digitalWrite(LEDEXT_PIN_4, (st & 0x1) > 0 ? LOW : HIGH);
-    */
+        digitalWrite(LEDEXT_PIN_4, (st & 0x1) > 0 ? HIGH : LOW);
     
     ison = st;
 }

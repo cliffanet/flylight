@@ -98,3 +98,7 @@ void btnHnd(button_time_t tm, button_hnd_t hnd) {
         case BTN_LONG:      btnst.hndlong = hnd; break;
     }
 }
+
+bool btnPushed() {
+    return digitalRead(BUTTON_PIN) == LOW;
+}

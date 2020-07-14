@@ -15,9 +15,6 @@ void setup() {
   
     //WiFi.mode(WIFI_OFF);
     
-    ledMonInit();
-    ledExtInit();
-
     // инициируем кнопки
     btnInit();
     btnHnd(BTN_SIMPLE, ledExtNext);

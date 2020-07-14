@@ -8,7 +8,7 @@
 #include "../def.h"
 
 // Пины кнопок
-#define BUTTON_PIN          D6
+#define BUTTON_PIN          3
 
 typedef void (*button_hnd_t)();
 
@@ -38,5 +38,6 @@ void btnInit();
 void btnProcess();
 void btnHndClear();
 void btnHnd(button_time_t tm, button_hnd_t hnd);
+bool btnPushed();
 
 #endif // _button_H

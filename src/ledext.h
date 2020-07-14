@@ -7,7 +7,10 @@
 
 #include "../def.h"
 
-#define LEDEXT_PIN_1    LED_BUILTIN
+#define LEDEXT_PIN_1    D5
+#define LEDEXT_PIN_2    D6
+#define LEDEXT_PIN_3    D7
+#define LEDEXT_PIN_4    D8
 
 typedef enum {
     LEDEXT_NONE = 0,

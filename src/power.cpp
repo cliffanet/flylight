@@ -33,11 +33,11 @@ static bool rtcSave(uint8_t v) {
 
 
 static void hwOff() {
-    ledMonDisable();
+    ledMonForce(false);
     ledExtDisable();
     
     // перед тем, как уйти в сон окончательно, дождёмся отпускания кнопки питания
-    while (digitalRead(BUTTON_PIN) == LOW)
+    while (btnPushed())
         delay(100);
     
     if (!rtcSave(0))
@@ -48,6 +48,8 @@ static void hwOff() {
 }
 
 static void hwOn() {
+    ledMonInit();
+    ledExtInit();
 }
 
 /* ------------------------------------------------------------------------------------------- *
@@ -66,13 +68,18 @@ bool pwrCheck() {
     
     pinMode(BUTTON_PIN, INPUT_PULLUP);
     int n = 0;
-    while (digitalRead(BUTTON_PIN) == LOW) {
+    while (btnPushed()) {
         if (n > 20) {
             // если кнопка нажата более 2 сек, 
             // сохраняем состояние как "вкл" и выходим с положительной проверкой
             if (!rtcSave(1))
                 return false;
             hwOn();
+
+            ledMonForce(true);
+            while (btnPushed()) {};
+            ledMonForce(false);
+    
             return true;
         }
         delay(100);

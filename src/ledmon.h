@@ -7,7 +7,7 @@
 
 #include "../def.h"
 
-#define LEDMON_PIN      D4 /*LED_BUILTIN*/
+#define LEDMON_PIN      D3
 
 typedef enum {
     LEDMON_NONE = 0,
@@ -23,7 +23,7 @@ typedef enum {
 } ledmon_sig_t;
 
 void ledMonInit();
-void ledMonDisable();
+void ledMonForce(bool on);
 void ledMonSet(int sig);
 void ledMonProcess();
 

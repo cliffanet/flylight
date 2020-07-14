@@ -29,9 +29,9 @@ void ledMonInit() {
     sigcurr = 0;
 }
 
-void ledMonDisable() {
-    digitalWrite(LEDMON_PIN, HIGH);
-    pinMode(LEDMON_PIN, INPUT);
+void ledMonForce(bool on) {
+    digitalWrite(LEDMON_PIN, on ? HIGH : LOW);
+    //pinMode(LEDMON_PIN, INPUT);
 }
 
 
@@ -45,7 +45,7 @@ void ledMonProcess() {
     
     if ((sigcurr < 1) || (sigcurr > (sizeof(sigall)/sizeof(sigall[0])))) {
         if (ison) {
-            digitalWrite(LEDMON_PIN, HIGH);
+            digitalWrite(LEDMON_PIN, LOW);
             ison = false;
         }
         return;
@@ -58,7 +58,7 @@ void ledMonProcess() {
     bool val = (b >> 0x07 - (m & 0x07)) & 0x01 > 0; // нижние 3 бита "индекса времени" = номер бита, отсчитанного от самого старшего
     
     if (val != ison) {
-        digitalWrite(LEDMON_PIN, val ? LOW : HIGH);
+        digitalWrite(LEDMON_PIN, val ? HIGH : LOW);
         ison = val;
     }
 }
