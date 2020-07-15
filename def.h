@@ -9,7 +9,8 @@
 
 #define HWVER       1
 
-#define MYNUM       0
+#define MYNUM       2
+
 #define MAXNUM      2
 
 #endif // _def_H

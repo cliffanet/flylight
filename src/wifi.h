@@ -15,4 +15,8 @@ void wifiDisable();
 void wifiModUpd();
 void wifiProcess();
 
+#if defined(MYNUM) && (MYNUM == 0)
+void wifiSendLight(uint8_t mode);
+#endif
+
 #endif // _wifi_H

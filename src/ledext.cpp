@@ -1,5 +1,8 @@
 
 #include "ledext.h"
+#if defined(MYNUM) && (MYNUM == 0)
+#include "wifi.h"
+#endif
 
 
 /* ------------------------------------------------------------------------------------------- *
@@ -56,6 +59,9 @@ void ledExtDisable() {
 
 
 void ledExtSet(ledext_mode_t mode) {
+#if defined(MYNUM) && (MYNUM == 0)
+    wifiSendLight(mode);
+#endif
     beg = millis();
     switch (mode) {
         case LEDEXT_NONE:       led = NULL;         return;

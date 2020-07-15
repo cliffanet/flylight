@@ -1,6 +1,7 @@
 
 #include "wifi.h"
 #include "ledmon.h"
+#include "ledext.h"
 
 #include <ESP8266WiFi.h>
 
@@ -89,15 +90,33 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
         wifiModUpd();
 #endif
     }
+
+#if defined(MYNUM) && (MYNUM > 0)
+    else
+    if ((len == 15) && (strncmp_P(data, PSTR("mode-flylight"), 13) == 0)) {
+        uint8_t mode = data[14];
+        switch (mode) {
+            case LEDEXT_BLINK:
+            case LEDEXT_SNAKE2:
+            case LEDEXT_CURT:
+                ledExtSet(static_cast<ledext_mode_t>(mode));
+        }
+    }
+#endif
 }
 
 #if defined(MYNUM) && (MYNUM == 0)
-static void sndbcast_P(const char *datas) {
+static void sndbcast_P(const char *datas, int val = -1) {
     uint8_t bcaddr[] = { 0xff,0xff,0xff,0xff,0xff,0xff };
     uint8_t data[20];
     strncpy_P(reinterpret_cast<char*>(data), datas, sizeof(data));
+    uint8_t len = strlen(reinterpret_cast<char*>(data))+1;
+    if ((val >= 0) && (val <= 255) && (len < 20)) {
+        data[len] = val;
+        len++;
+    }
     
-    esp_now_send(bcaddr, data, strlen(reinterpret_cast<char*>(data))+1);
+    esp_now_send(bcaddr, data, len);
 }
 #endif
 
@@ -184,3 +203,11 @@ void wifiProcess() {
     }
 #endif
 }
+
+
+#if defined(MYNUM) && (MYNUM == 0)
+void wifiSendLight(uint8_t mode) {
+    sndbcast_P(PSTR("mode-flylight"), mode);
+    
+}
+#endif
