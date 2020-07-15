@@ -15,6 +15,8 @@
 typedef enum {
     LEDEXT_NONE = 0,
     LEDEXT_BLINK,
+    LEDEXT_SNAKE2,
+    LEDEXT_CURT,
 } ledext_mode_t;
 
 void ledExtInit();

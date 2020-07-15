@@ -14,6 +14,19 @@ static const uint8_t led_blink[32] = {
     0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b10101010,
     0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b01010101,
 };
+static const uint8_t led_snake2[32] = {
+    0b10001000, 0b11001100, 0b01100110, 0b00110011, 0b00010001, 0b00000000, 0b00000000, 0b00000000,
+    0b10001000, 0b11001100, 0b01100110, 0b00110011, 0b00010001, 0b00000000, 0b00000000, 0b00000000,
+    0b10001000, 0b11001100, 0b01100110, 0b00110011, 0b00010001, 0b00000000, 0b00000000, 0b00000000,
+    0b10001000, 0b11001100, 0b01100110, 0b00110011, 0b00010001, 0b00000000, 0b00000000, 0b00000000,
+};
+static const uint8_t led_curt[32] = {
+    0b01100110, 0b10011001, 0b00000000, 0b10011001, 0b01100110, 0b00000000, 0b00000000, 0b00000000,
+    0b01100110, 0b10011001, 0b00000000, 0b10011001, 0b01100110, 0b00000000, 0b00000000, 0b00000000,
+    0b01100110, 0b10011001, 0b00000000, 0b10011001, 0b01100110, 0b00000000, 0b00000000, 0b00000000,
+    0b01100110, 0b10011001, 0b00000000, 0b10011001, 0b01100110, 0b00000000, 0b00000000, 0b00000000,
+};
+
 static uint32_t beg = 0;
 static uint8_t ison = 0;
 
@@ -47,6 +60,8 @@ void ledExtSet(ledext_mode_t mode) {
     switch (mode) {
         case LEDEXT_NONE:       led = NULL;         return;
         case LEDEXT_BLINK:      led = led_blink;    return;
+        case LEDEXT_SNAKE2:     led = led_snake2;   return;
+        case LEDEXT_CURT:       led = led_curt;     return;
         default:                led = NULL;
     }
 }
@@ -55,6 +70,12 @@ void ledExtNext() {
         ledExtSet(LEDEXT_BLINK);
     else
     if (led == led_blink)
+        ledExtSet(LEDEXT_SNAKE2);
+    else
+    if (led == led_snake2)
+        ledExtSet(LEDEXT_CURT);
+    else
+    if (led == led_curt)
         ledExtSet(LEDEXT_NONE);
     else
         ledExtSet(LEDEXT_NONE);
