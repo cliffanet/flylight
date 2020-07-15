@@ -2,6 +2,7 @@
 #include "power.h"
 #include "ledmon.h"
 #include "ledExt.h"
+#include "wifi.h"
 #include "button.h"
 
 /* ------------------------------------------------------------------------------------------- *
@@ -35,6 +36,7 @@ static bool rtcSave(uint8_t v) {
 static void hwOff() {
     ledMonForce(false);
     ledExtDisable();
+    wifiDisable();
     
     // перед тем, как уйти в сон окончательно, дождёмся отпускания кнопки питания
     while (btnPushed())
@@ -50,6 +52,7 @@ static void hwOff() {
 static void hwOn() {
     ledMonInit();
     ledExtInit();
+    wifiInit();
 }
 
 /* ------------------------------------------------------------------------------------------- *
@@ -175,6 +178,7 @@ void pwrOffProcess() {
                 btnHnd(BTN_SIMPLE, ledExtNext);
                 btnHnd(BTN_LONG, pwrOffBegin);
                 // тут надо восстановить нужный режим моргания дежурного светодиода
+                wifiModUpd();
             }
             return;
             
