@@ -105,6 +105,7 @@ void pwrOffBegin() { // запуск отключения
     offstate = 1;
     offtm = millis();
     ledMonSet(LEDMON_ON);
+    ledExtSet(LEDEXT_NONE);
 }
 
 static void pwrOffFail() {

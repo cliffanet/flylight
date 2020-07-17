@@ -11,6 +11,13 @@
 
 static const uint8_t *led = NULL;
 
+static const uint8_t led_solidall[32] = {
+    0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111,
+    0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111,
+    0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111,
+    0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111,
+};
+
 static const uint8_t led_blink[32] = {
     0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b10101010, 0b10101010,
     0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b01010101, 0b01010101,
@@ -65,6 +72,7 @@ void ledExtSet(ledext_mode_t mode) {
     beg = millis();
     switch (mode) {
         case LEDEXT_NONE:       led = NULL;         return;
+        case LEDEXT_SOLIDALL:   led = led_solidall; return;
         case LEDEXT_BLINK:      led = led_blink;    return;
         case LEDEXT_SNAKE2:     led = led_snake2;   return;
         case LEDEXT_CURT:       led = led_curt;     return;
@@ -73,6 +81,9 @@ void ledExtSet(ledext_mode_t mode) {
 }
 void ledExtNext() {
     if (led == NULL)
+        ledExtSet(LEDEXT_SOLIDALL);
+    else
+    if (led == led_solidall)
         ledExtSet(LEDEXT_BLINK);
     else
     if (led == led_blink)
@@ -82,7 +93,7 @@ void ledExtNext() {
         ledExtSet(LEDEXT_CURT);
     else
     if (led == led_curt)
-        ledExtSet(LEDEXT_NONE);
+        ledExtSet(LEDEXT_SOLIDALL);
     else
         ledExtSet(LEDEXT_NONE);
 }

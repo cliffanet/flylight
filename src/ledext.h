@@ -14,6 +14,7 @@
 
 typedef enum {
     LEDEXT_NONE = 0,
+    LEDEXT_SOLIDALL,
     LEDEXT_BLINK,
     LEDEXT_SNAKE2,
     LEDEXT_CURT,
