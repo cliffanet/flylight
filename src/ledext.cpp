@@ -37,6 +37,7 @@ static const uint8_t led_curt[32] = {
     0b01100110, 0b10011001, 0b00000000, 0b10011001, 0b01100110, 0b00000000, 0b00000000, 0b00000000,
 };
 
+static ledext_mode_t mode = LEDEXT_NONE;
 static uint32_t beg = 0;
 static uint8_t ison = 0;
 
@@ -62,10 +63,51 @@ void ledExtDisable() {
     //pinMode(LEDEXT_PIN_3, INPUT);
     digitalWrite(LEDEXT_PIN_4, LOW);
     //pinMode(LEDEXT_PIN_4, INPUT);
+    mode = LEDEXT_NONE;
+    led = NULL;
+    beg = 0;
+    ison = 0;
 }
 
 
-void ledExtSet(ledext_mode_t mode) {
+
+bool ledExtGet(ledext_mode_t &_mode, uint32_t &tm) {
+    _mode = mode;
+    
+    if (beg == 0) {
+        tm = 0;
+        return false;
+    }
+    
+    tm = millis() - beg;
+
+    Serial.printf("ledExtGet: %d / %d\r\n", mode, tm);
+    
+    return mode >= LEDEXT_AUTO;
+}
+
+void ledExtSync(ledext_mode_t _mode, uint32_t tm) {
+    if ((_mode < LEDEXT_AUTO) || (tm == 0))
+        return;
+    
+    uint32_t m = millis()-tm;
+    int32_t d = beg - m;
+    if (abs(d) <= 1000)
+        return;
+    
+    ledExtSet(_mode);
+    beg = m;
+}
+
+void ledExtDisconnect() {
+    if (mode <= LEDEXT_AUTO)
+        return;
+    
+    ledExtSet(LEDEXT_AUTO);
+}
+
+void ledExtSet(ledext_mode_t _mode) {
+    mode = _mode;
 #if defined(MYNUM) && (MYNUM == 0)
     wifiSendLight(mode);
 #endif
@@ -80,22 +122,10 @@ void ledExtSet(ledext_mode_t mode) {
     }
 }
 void ledExtNext() {
-    if (led == NULL)
-        ledExtSet(LEDEXT_SOLIDALL);
+    if ((mode < LEDEXT_AUTO) || ((mode+1)>=LEDEXT_OUTMAX))
+        ledExtSet(static_cast<ledext_mode_t>(LEDEXT_AUTO));
     else
-    if (led == led_solidall)
-        ledExtSet(LEDEXT_BLINK);
-    else
-    if (led == led_blink)
-        ledExtSet(LEDEXT_SNAKE2);
-    else
-    if (led == led_snake2)
-        ledExtSet(LEDEXT_CURT);
-    else
-    if (led == led_curt)
-        ledExtSet(LEDEXT_SOLIDALL);
-    else
-        ledExtSet(LEDEXT_NONE);
+        ledExtSet(static_cast<ledext_mode_t>(mode+1));
 }
 
 static void setstate(uint8_t st) {

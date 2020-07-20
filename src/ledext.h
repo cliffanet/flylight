@@ -18,10 +18,16 @@ typedef enum {
     LEDEXT_BLINK,
     LEDEXT_SNAKE2,
     LEDEXT_CURT,
+    LEDEXT_OUTMAX
 } ledext_mode_t;
+
+#define LEDEXT_AUTO     LEDEXT_SOLIDALL
 
 void ledExtInit();
 void ledExtDisable();
+bool ledExtGet(ledext_mode_t &mode, uint32_t &tm);
+void ledExtSync(ledext_mode_t mode, uint32_t tm);
+void ledExtDisconnect();
 void ledExtSet(ledext_mode_t mode);
 void ledExtNext();
 void ledExtProcess();

@@ -45,13 +45,17 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
     //              mac[0],mac[1],mac[2],mac[3],mac[4],mac[5],
     //              len, ds);
                 
-    if ((len == 16) && (strncmp_P(data, PSTR("beacon-flylight"), 15) == 0)) {
+    if ((len == 21) && (strncmp_P(data, PSTR("beacon-flylight"), 15) == 0)) {
     //    Serial.println("is beacon");
 #if defined(MYNUM) && (MYNUM == 0)
         // Для головного получение такого пакета - это всегда ошибка дубликата мастера
         state = WIFIST_CONNECTERR;
         wifiModUpd();
 #elif defined(MYNUM)
+        uint32_t tm;
+        memcpy(&tm, data+17, sizeof(tm));
+        ledExtSync(static_cast<ledext_mode_t>(data[16]), ntohl(tm));
+        
         // Для любого слейва сверяем мак головного
         uint8_t data[20];
         strcpy_P(reinterpret_cast<char*>(data), PSTR("slave-flylight"));
@@ -60,8 +64,9 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
         if (state == WIFIST_INITOK) {
             state = WIFIST_CONNECTOK;
             wifiModUpd();
-        } 
+        }
         beaclast = millis();
+        
 #endif
     }
     else
@@ -106,16 +111,8 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
 }
 
 #if defined(MYNUM) && (MYNUM == 0)
-static void sndbcast_P(const char *datas, int val = -1) {
+static void sndbcast(uint8_t *data, uint8_t len) {
     uint8_t bcaddr[] = { 0xff,0xff,0xff,0xff,0xff,0xff };
-    uint8_t data[20];
-    strncpy_P(reinterpret_cast<char*>(data), datas, sizeof(data));
-    uint8_t len = strlen(reinterpret_cast<char*>(data))+1;
-    if ((val >= 0) && (val <= 255) && (len < 20)) {
-        data[len] = val;
-        len++;
-    }
-    
     esp_now_send(bcaddr, data, len);
 }
 #endif
@@ -168,7 +165,22 @@ void wifiProcess() {
     static uint8_t nbc = 0;
     nbc++;
     if (nbc == WIFI_UPD_INTERVAL) {
-        sndbcast_P(PSTR("beacon-flylight"));
+        ledext_mode_t mode;
+        uint32_t tm;
+        uint8_t data[25];
+        
+        strncpy_P(reinterpret_cast<char*>(data), PSTR("beacon-flylight"), sizeof(data));
+        
+        if (ledExtGet(mode, tm)) {
+            data[16] = mode;
+            tm = htonl(tm);
+            memcpy(data+17, &tm, sizeof(tm));
+        }
+        else {
+            bzero(data+16, 5);
+        }
+        
+        sndbcast(data, 21);
         nbc = 0;
     }
     
@@ -199,6 +211,8 @@ void wifiProcess() {
         if (state != st) {
             state = st;
             wifiModUpd();
+            if (st != WIFIST_CONNECTOK)
+                ledExtDisconnect();
         }
     }
 #endif
@@ -207,7 +221,9 @@ void wifiProcess() {
 
 #if defined(MYNUM) && (MYNUM == 0)
 void wifiSendLight(uint8_t mode) {
-    sndbcast_P(PSTR("mode-flylight"), mode);
-    
+    uint8_t data[20];
+    strncpy_P(reinterpret_cast<char*>(data), PSTR("mode-flylight"), sizeof(data));
+    data[14] = mode;
+    sndbcast(data, 15);
 }
 #endif
