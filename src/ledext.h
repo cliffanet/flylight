@@ -14,22 +14,16 @@
 
 typedef enum {
     LEDEXT_NONE = 0,
-    LEDEXT_SOLIDALL,
-    LEDEXT_BLINK,
-    LEDEXT_SNAKE2,
-    LEDEXT_CURT,
+    LEDEXT_AUTO,
+    LEDEXT_STAR,
+    LEDEXT_CLOCKIN,
+    LEDEXT_CLOCKOUT,
     LEDEXT_OUTMAX
 } ledext_mode_t;
 
-#define LEDEXT_AUTO     LEDEXT_SOLIDALL
-
-void ledExtInit();
-void ledExtDisable();
 bool ledExtGet(ledext_mode_t &mode, uint32_t &tm);
-void ledExtSync(ledext_mode_t mode, uint32_t tm);
-void ledExtDisconnect();
-void ledExtSet(ledext_mode_t mode);
+void ledExtSet(ledext_mode_t _mode, uint32_t tm = 0);
 void ledExtNext();
-void ledExtProcess();
+void ledExtDisconnect();
 
 #endif // _ledext_H

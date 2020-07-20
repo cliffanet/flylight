@@ -31,9 +31,7 @@ typedef enum {
 #define ERR_WIFIINIT        LEDMON_ERR3
 #define ERR_WIFICONNECT     LEDMON_ERR4
 
-void ledMonInit();
-void ledMonForce(bool on);
-void ledMonSet(int sig);
-void ledMonProcess();
+void ledMonForce(bool ison);
+void ledMonSet(int signum);
 
 #endif // _ledmon_H

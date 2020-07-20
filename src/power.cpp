@@ -1,7 +1,8 @@
 
 #include "power.h"
+#include "led.h"
 #include "ledmon.h"
-#include "ledExt.h"
+#include "ledext.h"
 #include "wifi.h"
 #include "button.h"
 
@@ -34,8 +35,7 @@ static bool rtcSave(uint8_t v) {
 
 
 static void hwOff() {
-    ledMonForce(false);
-    ledExtDisable();
+    ledDisable();
     wifiDisable();
     
     // перед тем, как уйти в сон окончательно, дождёмся отпускания кнопки питания
@@ -50,8 +50,7 @@ static void hwOff() {
 }
 
 static void hwOn() {
-    ledMonInit();
-    ledExtInit();
+    ledInit();
     wifiInit();
 }
 
@@ -104,8 +103,8 @@ void pwrOffBegin() { // запуск отключения
     
     offstate = 1;
     offtm = millis();
-    ledMonSet(LEDMON_ON);
     ledExtSet(LEDEXT_NONE);
+    ledForce(LED_MONITOR, true);
 }
 
 static void pwrOffFail() {

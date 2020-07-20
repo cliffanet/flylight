@@ -2,7 +2,7 @@
 #include "def.h"
 
 #include "src/power.h"
-#include "src/ledmon.h"
+#include "src/led.h"
 #include "src/ledext.h"
 #include "src/button.h"
 #include "src/wifi.h"
@@ -26,8 +26,7 @@ void setup() {
 void loop() {
     static uint32_t m = millis();
 
-    ledMonProcess();
-    ledExtProcess();
+    ledProcess();
     btnProcess();
     pwrOffProcess();
     wifiProcess();
