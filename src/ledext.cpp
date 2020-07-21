@@ -1,6 +1,7 @@
 
 #include "ledext.h"
 #include "led.h"
+#include "ctrl.h"
 #if defined(MYNUM) && (MYNUM == 0)
 #include "wifi.h"
 #endif
@@ -11,6 +12,10 @@
  * ------------------------------------------------------------------------------------------- */
 static const ledarr_t led_solid = {
     0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111,
+};
+
+static const ledarr_t led_cnp = {
+    0b11111111, 0b00001111, 0b00001111, 0b11111111, 0b11111111, 0b00001111, 0b00001111, 0b11111111,
 };
 
 static const ledarr_t led_star1 = {
@@ -65,11 +70,31 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
             return;
             
         case LEDEXT_AUTO:
-            ledSet(LED_EXT1, led_solid);
-            ledSet(LED_EXT2, led_solid);
-            ledSet(LED_EXT3, led_solid);
-            ledSet(LED_EXT4, led_solid);
-            return;
+            switch (ctrlMode()) {
+                case CTRL_INIT:
+                case CTRL_TOFF:
+                    ledSet(LED_EXT1, NULL);
+                    ledSet(LED_EXT2, NULL);
+                    ledSet(LED_EXT3, NULL);
+                    ledSet(LED_EXT4, NULL);
+                    return;
+                
+                case CTRL_GND:
+                case CTRL_FFALL:
+                case CTRL_BREAKOFF:
+                    ledSet(LED_EXT1, led_solid);
+                    ledSet(LED_EXT2, led_solid);
+                    ledSet(LED_EXT3, led_solid);
+                    ledSet(LED_EXT4, led_solid);
+                    return;
+                    
+                case CTRL_CNP:
+                    ledSet(LED_EXT1, led_solid);
+                    ledSet(LED_EXT2, led_cnp);
+                    ledSet(LED_EXT3, led_cnp);
+                    ledSet(LED_EXT4, led_solid);
+                    return;
+            }
             
         case LEDEXT_STAR:
             ledSet(LED_EXT1, led_star1, tm);

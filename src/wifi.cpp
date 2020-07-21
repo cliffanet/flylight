@@ -2,6 +2,7 @@
 #include "wifi.h"
 #include "ledmon.h"
 #include "ledext.h"
+#include "ctrl.h"
 
 #include <ESP8266WiFi.h>
 
@@ -147,10 +148,10 @@ void wifiModUpd() {
     switch (state) {
         case WIFIST_NONE:       ledMonSet(LEDMON_NONE);         return;
         case WIFIST_INITERR:    ledMonSet(ERR_WIFIINIT);        return;
-        case WIFIST_INITOK:     ledMonSet(STATE_WIFIOK);        return;
+        case WIFIST_INITOK:     ledMonSet(ctrlMode() > CTRL_GND ? STATE_SKYOK       : STATE_WIFIOK);        return;
         case WIFIST_CONNECTERR: ledMonSet(ERR_WIFICONNECT);     return;
-        case WIFIST_CONNECTOK:  ledMonSet(STATE_WIFICONNECT);   return;
-        case WIFIST_CONNECTALL: ledMonSet(STATE_WIFIALL);       return;
+        case WIFIST_CONNECTOK:  ledMonSet(ctrlMode() > CTRL_GND ? STATE_SKYCONNECT  : STATE_WIFICONNECT);   return;
+        case WIFIST_CONNECTALL: ledMonSet(ctrlMode() > CTRL_GND ? STATE_SKYALL      : STATE_WIFIALL);       return;
     }
 }
 
