@@ -49,14 +49,17 @@ bool ledExtGet(ledext_mode_t &_mode, uint32_t &tm) {
 void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
     mode = _mode;
     beg = millis()-tm;
-#if defined(MYNUM) && (MYNUM == 0)
-    wifiSendLight(mode);
-#endif
-    beg = millis();
     switch (mode) {
         case LEDEXT_NONE:
             ledSet(LED_EXT1, NULL);
             ledSet(LED_EXT2, NULL);
+            ledSet(LED_EXT3, NULL);
+            ledSet(LED_EXT4, NULL);
+            return;
+            
+        case LEDEXT_MINI:
+            ledSet(LED_EXT1, NULL);
+            ledSet(LED_EXT2, led_solid);
             ledSet(LED_EXT3, NULL);
             ledSet(LED_EXT4, NULL);
             return;
@@ -116,11 +119,31 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
             return;
     }
 }
-void ledExtNext() {
+
+void ledExtNextGnd() {
     if ((mode < LEDEXT_AUTO) || ((mode+1)>=LEDEXT_OUTMAX))
         ledExtSet(static_cast<ledext_mode_t>(LEDEXT_AUTO));
     else
         ledExtSet(static_cast<ledext_mode_t>(mode+1));
+    
+#if defined(MYNUM) && (MYNUM == 0)
+    wifiSendLight(mode);
+#endif
+}
+
+void ledExtNextTOff() {
+    ledExtSet(mode == LEDEXT_AUTO ? LEDEXT_MINI : LEDEXT_AUTO);
+}
+
+void ledExtNextFFall() {
+    if ((mode <= LEDEXT_AUTO) || ((mode+1)>=LEDEXT_OUTMAX))
+        ledExtSet(static_cast<ledext_mode_t>(LEDEXT_AUTO+1));
+    else
+        ledExtSet(static_cast<ledext_mode_t>(mode+1));
+
+#if defined(MYNUM) && (MYNUM == 0)
+    wifiSendLight(mode);
+#endif
 }
 
 void ledExtDisconnect() {

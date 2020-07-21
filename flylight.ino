@@ -3,9 +3,9 @@
 
 #include "src/power.h"
 #include "src/led.h"
-#include "src/ledext.h"
 #include "src/button.h"
 #include "src/wifi.h"
+#include "src/ctrl.h"
 
 //------------------------------------------------------------------------------
 void setup() {
@@ -14,14 +14,15 @@ void setup() {
     
     // инициируем кнопки
     btnInit();
-    btnHnd(BTN_SIMPLE, ledExtNext);
-    btnHnd(BTN_LONG, pwrOffBegin);
+
+    ctrlInit();
 }
 
 //------------------------------------------------------------------------------
 void loop() {
     static uint32_t m = millis();
 
+    ctrlProcess();
     ledProcess();
     btnProcess();
     pwrOffProcess();

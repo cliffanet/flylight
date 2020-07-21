@@ -5,6 +5,7 @@
 #include "ledext.h"
 #include "wifi.h"
 #include "button.h"
+#include "ctrl.h"
 
 /* ------------------------------------------------------------------------------------------- *
  *  работа с rtc-памятью - сохраняем там текущее состояние вкл-выкл
@@ -181,10 +182,7 @@ void pwrOffProcess() {
                 // кнопка зажата слишком долго, завершаем процесс
                 offstate = 0;
                 offtm = 0;
-                btnHnd(BTN_SIMPLE, ledExtNext);
-                btnHnd(BTN_LONG, pwrOffBegin);
-                // тут надо восстановить нужный режим моргания дежурного светодиода
-                wifiModUpd();
+                ctrlUpdate();
             }
             return;
             
