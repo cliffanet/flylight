@@ -21,7 +21,7 @@ typedef uint8_t ledarr_t[8];
 
 void ledInit();
 void ledDisable();
-void ledSet(led_index_t li, const uint8_t *bit, uint8_t dly = 0, uint8_t mrr = 0, uint32_t tm = 0);
+void ledSet(led_index_t li, const uint8_t *bit, uint32_t tm = 0, uint8_t dly = 0, uint8_t mrr = 0);
 void ledForce(led_index_t li, bool ison);
 void ledProcess();
 

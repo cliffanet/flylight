@@ -47,7 +47,7 @@ void ledDisable() {
     }
 }
 
-void ledSet(led_index_t li, const uint8_t *bit, uint8_t dly, uint8_t mrr, uint32_t tm) {
+void ledSet(led_index_t li, const uint8_t *bit, uint32_t tm, uint8_t dly, uint8_t mrr) {
     auto &l = led[li];
     if (bit == NULL) {
         l.bit = NULL;

@@ -69,10 +69,10 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
             return;
             
         case LEDEXT_STAR:
-            ledSet(LED_EXT1, led_star1, 0, 0, tm);
-            ledSet(LED_EXT2, led_star2, 0, 0, tm);
-            ledSet(LED_EXT3, led_star2, 0, 0, tm);
-            ledSet(LED_EXT4, led_star1, 0, 0, tm);
+            ledSet(LED_EXT1, led_star1, tm);
+            ledSet(LED_EXT2, led_star2, tm);
+            ledSet(LED_EXT3, led_star2, tm);
+            ledSet(LED_EXT4, led_star1, tm);
             return;
 
 #if defined(MYNUM) && (MYNUM == 0)
@@ -82,7 +82,7 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
 #endif
             
         case LEDEXT_CLOCKTST1:
-            ledSet(LED_EXT1, led_clock3, MYNUM*8, 0, tm);
+            ledSet(LED_EXT1, led_clock3, tm, MYNUM*8);
             ledSet(LED_EXT2, NULL);
             ledSet(LED_EXT3, NULL);
             ledSet(LED_EXT4, NULL);
@@ -91,20 +91,20 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
             ledSet(LED_EXT1, NULL);
             ledSet(LED_EXT2, NULL);
             ledSet(LED_EXT3, NULL);
-            ledSet(LED_EXT4, led_clock3, REVNUM*8, 31, tm);
+            ledSet(LED_EXT4, led_clock3, tm, REVNUM*8, 31);
             return;
             
         case LEDEXT_CLOCKIN:
-            ledSet(LED_EXT1, led_clock3, MYNUM*8, 0, tm);
-            ledSet(LED_EXT2, led_solid, 0, 0, tm);
-            ledSet(LED_EXT3, led_solid, 0, 0, tm);
-            ledSet(LED_EXT4, led_clock3, REVNUM*8, 31, tm);
+            ledSet(LED_EXT1, led_clock3, tm, MYNUM*8);
+            ledSet(LED_EXT2, led_solid, tm);
+            ledSet(LED_EXT3, led_solid, tm);
+            ledSet(LED_EXT4, led_clock3, tm, REVNUM*8, 31);
             return;
             
         case LEDEXT_CLOCKOUT:
             ledSet(LED_EXT1, NULL);
-            ledSet(LED_EXT2, led_clock6, MYNUM*8+4, 0, tm);
-            ledSet(LED_EXT3, led_clock6, MYNUM*8, 0, tm);
+            ledSet(LED_EXT2, led_clock6, tm, MYNUM*8+4);
+            ledSet(LED_EXT3, led_clock6, tm, MYNUM*8);
             ledSet(LED_EXT4, NULL);
             return;
         
