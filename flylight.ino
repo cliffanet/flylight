@@ -7,14 +7,10 @@
 #include "src/button.h"
 #include "src/wifi.h"
 
-//#include <WiFi.h>
-
 //------------------------------------------------------------------------------
 void setup() {
     if (!pwrCheck())
         return;
-  
-    //WiFi.mode(WIFI_OFF);
     
     // инициируем кнопки
     btnInit();

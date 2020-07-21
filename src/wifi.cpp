@@ -17,7 +17,8 @@ static enum {
     WIFIST_INITERR,
     WIFIST_INITOK,
     WIFIST_CONNECTERR,
-    WIFIST_CONNECTOK
+    WIFIST_CONNECTOK,
+    WIFIST_CONNECTALL
 } state = WIFIST_NONE;
 
 #if defined(MYNUM) && (MYNUM == 0)
@@ -114,13 +115,14 @@ static void sndbcast(uint8_t *data, uint8_t len) {
 #endif
 
 void wifiInit() {
-    //Serial.begin(115200);
 #if defined(MYNUM) && (MYNUM == 0)
     bzero(peer, sizeof(peer));
 #endif
-    
-    WiFi.softAP("flylight", "flylight123", WIFI_CHANNEL, false);
+
+    WiFi.persistent(false);
+    WiFi.enableAP(true);
     WiFi.mode(WIFI_AP_STA);
+    //WiFi.softAP("flylight", "flylight123", WIFI_CHANNEL, false);
     
     if ((esp_now_init() == ESP_OK) &&
         (esp_now_set_self_role(ESP_NOW_ROLE_COMBO) == ESP_OK) &&
@@ -148,6 +150,7 @@ void wifiModUpd() {
         case WIFIST_INITOK:     ledMonSet(STATE_WIFIOK);        return;
         case WIFIST_CONNECTERR: ledMonSet(ERR_WIFICONNECT);     return;
         case WIFIST_CONNECTOK:  ledMonSet(STATE_WIFICONNECT);   return;
+        case WIFIST_CONNECTALL: ledMonSet(STATE_WIFIALL);       return;
     }
 }
 
@@ -181,21 +184,19 @@ void wifiProcess() {
     }
     
     // Проверяем таймауты клиентов и все ли подсоединены
-    uint8_t full = 0, n = 0;
+    uint8_t connected = 0;
     uint32_t timeout = millis() - (64*WIFI_UPD_INTERVAL*3);
     for (auto &p : peer) {
-        n++;
-        
         if (p.connected && (p.last <= timeout))
             p.connected = false;
         
-        if ((n == (full+1)) && p.connected)
-            full = n;
+        if (p.connected)
+            connected ++;
     }
     
     // Проверка текущего состояния
-    if ((state == WIFIST_INITOK) || (state == WIFIST_CONNECTOK)) {
-        auto st = full == MAXNUM ? WIFIST_CONNECTOK : WIFIST_INITOK;
+    if ((state == WIFIST_INITOK) || (state == WIFIST_CONNECTOK) || (state == WIFIST_CONNECTALL)) {
+        auto st = connected == MAXNUM ? WIFIST_CONNECTALL : connected > 0 ? WIFIST_CONNECTOK : WIFIST_INITOK;
         if (state != st) {
             state = st;
             wifiModUpd();

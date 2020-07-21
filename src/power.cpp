@@ -76,11 +76,16 @@ bool pwrCheck() {
             // сохраняем состояние как "вкл" и выходим с положительной проверкой
             if (!rtcSave(1))
                 return false;
-            hwOn();
-
+            
+            ledInit();
             ledMonForce(true);
             while (btnPushed()) {};
             ledMonForce(false);
+            
+            ESP.restart(); // Костыль, без которого почему-то не запускается вифи после deepsleep
+                            // причина непонятна, помогает только принудительный ребут после сна
+            
+            hwOn();
     
             return true;
         }
@@ -149,6 +154,7 @@ void pwrOffProcess() {
                 offtm = millis();
                 btnHnd(BTN_SIMPLE, pwrOffClick);
                 btnHnd(BTN_LONG, NULL);
+                ledForce(LED_MONITOR, false);
                 ledMonSet(LEDMON_PWROFF);
             }
             return;
