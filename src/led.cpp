@@ -12,8 +12,8 @@ struct {
     uint8_t pin;
     bool    ison;
     const uint8_t *bit;
-    uint8_t off_fwd; 
-    uint8_t off_bck;
+    uint8_t dly; 
+    uint8_t mrr;
     uint32_t beg;
 } led[5] = {
     { LEDMON_PIN },
@@ -29,8 +29,8 @@ void ledInit() {
         pinMode(l.pin, OUTPUT);
         l.ison = false;
         l.bit = NULL;
-        l.off_fwd = 0;
-        l.off_bck = 0;
+        l.dly = 0;
+        l.mrr = 0;
         l.beg = 0;
     }
 }
@@ -41,24 +41,24 @@ void ledDisable() {
         //pinMode(l.pin, OUTPUT);
         l.ison = false;
         l.bit = NULL;
-        l.off_fwd = 0;
-        l.off_bck = 0;
+        l.dly = 0;
+        l.mrr = 0;
         l.beg = 0;
     }
 }
 
-void ledSet(led_index_t li, const uint8_t *bit, uint8_t off_fwd, uint8_t off_bck, uint32_t tm) {
+void ledSet(led_index_t li, const uint8_t *bit, uint8_t dly, uint8_t mrr, uint32_t tm) {
     auto &l = led[li];
     if (bit == NULL) {
         l.bit = NULL;
-        l.off_fwd = 0;
-        l.off_bck = 0;
+        l.dly = 0;
+        l.mrr = 0;
         l.beg = 0;
     }
     else {
         l.bit = bit;
-        l.off_fwd = off_fwd;
-        l.off_bck = off_bck;
+        l.dly = dly;
+        l.mrr = mrr;
         l.beg = millis() - tm;
     }
 }
@@ -67,8 +67,8 @@ void ledForce(led_index_t li, bool ison) {
     auto &l = led[li];
     l.ison = false;
     l.bit = NULL;
-    l.off_fwd = 0;
-    l.off_bck = 0;
+    l.dly = 0;
+    l.mrr = 0;
     l.beg = 0;
     digitalWrite(l.pin, ison ? HIGH : LOW);
 }
@@ -85,12 +85,17 @@ void ledProcess() {
         }
 
         // m - индекс времени (0..63) - увеличивается на 1 каждые 64 мс
-        uint32_t m = (((millis() - l.beg) >> 6) + l.off_fwd) & 0x3f;     // делим millis() целочисленно на 64, а потом еще берём остаток от деления на 64
+        uint32_t m = (((mill - l.beg) >> 6) - l.dly) & 0x3f;     // делим millis() целочисленно на 64, а потом еще берём остаток от деления на 64
                                                                         // получается, что будем отсчитывать каждые 64 ms х 64 раз = 4096 ms (полный цикл)
-        // l.off_fwd - сдвиг индекса времени на N позиций вперёд, поэтому его просто прибавляем до вычисления остатка от деления на 64
-        // l.off_bck - это обратный отсчёт, начиная с N
-        if (l.off_bck > 0)
-            m = (l.off_bck - m) & 0x3f;
+        // l.dly - задержка индекса времени на N позиций, поэтому его просто вычитаем до вычисления остатка от деления на 64
+        // l.mrr - это обратный отсчёт, начиная с N
+        // При использовании mrr надо не забыть сдвиг dly делать тоже обратным относительно общего числа устройств,
+        // тут автоматизировать это не получится, это надо делать в ledExtSet с учётом алгоритма
+        if (l.mrr > 0) {
+            int8_t mrr = l.mrr;
+            mrr -= m;
+            m = static_cast<uint8_t>(mrr) & 0x3f;
+        }
         
         // i - индекс массива = надо поделить индекс времени на 8
         uint8_t i = (m >> 3) & 0x7;

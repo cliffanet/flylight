@@ -20,6 +20,16 @@ static const ledarr_t led_star2 = {
     0b00111100, 0b00000011, 0b11000000, 0b00111100, 0b00000011, 0b11000000, 0b00111100, 0b00000000
 };
 
+static const ledarr_t led_clock3 = {
+    //0b11110000, 0b00001111, 0b00000000, 0b11110000, 0b00001111, 0b00000000, 0b11110000, 0b00000000
+    0b11111111, 0b00000000, 0b00000000, 0b11111111, 0b00000000, 0b00000000, 0b00000000, 0b00000000
+};
+
+static const ledarr_t led_clock6 = {
+    //0b11110000, 0b00001111, 0b00000000, 0b11110000, 0b00001111, 0b00000000, 0b11110000, 0b00000000
+    0b11110000, 0b00000000, 0b00000000, 0b11110000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
+};
+
 static ledext_mode_t mode = LEDEXT_NONE;
 static uint32_t beg = 0;
 
@@ -57,13 +67,47 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
             ledSet(LED_EXT3, led_solid);
             ledSet(LED_EXT4, led_solid);
             return;
+            
         case LEDEXT_STAR:
             ledSet(LED_EXT1, led_star1, 0, 0, tm);
             ledSet(LED_EXT2, led_star2, 0, 0, tm);
             ledSet(LED_EXT3, led_star2, 0, 0, tm);
             ledSet(LED_EXT4, led_star1, 0, 0, tm);
             return;
-        //case LEDEXT_CLOCKIN:    led = led_clock;    return;
+
+#if defined(MYNUM) && (MYNUM == 0)
+#define REVNUM 0
+#elif defined(MYNUM)
+#define REVNUM (MAXNUM+1-MYNUM)
+#endif
+            
+        case LEDEXT_CLOCKTST1:
+            ledSet(LED_EXT1, led_clock3, MYNUM*8, 0, tm);
+            ledSet(LED_EXT2, NULL);
+            ledSet(LED_EXT3, NULL);
+            ledSet(LED_EXT4, NULL);
+            return;
+        case LEDEXT_CLOCKTST4:
+            ledSet(LED_EXT1, NULL);
+            ledSet(LED_EXT2, NULL);
+            ledSet(LED_EXT3, NULL);
+            ledSet(LED_EXT4, led_clock3, REVNUM*8, 31, tm);
+            return;
+            
+        case LEDEXT_CLOCKIN:
+            ledSet(LED_EXT1, led_clock3, MYNUM*8, 0, tm);
+            ledSet(LED_EXT2, led_solid, 0, 0, tm);
+            ledSet(LED_EXT3, led_solid, 0, 0, tm);
+            ledSet(LED_EXT4, led_clock3, REVNUM*8, 31, tm);
+            return;
+            
+        case LEDEXT_CLOCKOUT:
+            ledSet(LED_EXT1, NULL);
+            ledSet(LED_EXT2, led_clock6, MYNUM*8+4, 0, tm);
+            ledSet(LED_EXT3, led_clock6, MYNUM*8, 0, tm);
+            ledSet(LED_EXT4, NULL);
+            return;
+        
         default:
             ledSet(LED_EXT1, NULL);
             ledSet(LED_EXT2, NULL);
