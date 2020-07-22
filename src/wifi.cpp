@@ -1,6 +1,5 @@
 
 #include "wifi.h"
-#include "ledmon.h"
 #include "ledext.h"
 #include "ctrl.h"
 
@@ -13,14 +12,7 @@
 #define ESP_OK 0
 #endif
 
-static enum {
-    WIFIST_NONE = 0,
-    WIFIST_INITERR,
-    WIFIST_INITOK,
-    WIFIST_CONNECTERR,
-    WIFIST_CONNECTOK,
-    WIFIST_CONNECTALL
-} state = WIFIST_NONE;
+static wifi_state_t state = WIFIST_NONE;
 
 #if defined(MYNUM) && (MYNUM == 0)
 
@@ -35,6 +27,11 @@ static struct {
 static uint32_t beaclast  = 0;
  
 #endif
+
+static void wifiState(wifi_state_t _state) {
+    state = _state;
+    ctrlUpdate();
+}
 
 static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
     if (state == WIFIST_CONNECTERR)
@@ -51,8 +48,7 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
     //    Serial.println("is beacon");
 #if defined(MYNUM) && (MYNUM == 0)
         // Для головного получение такого пакета - это всегда ошибка дубликата мастера
-        state = WIFIST_CONNECTERR;
-        wifiModUpd();
+        wifiState(WIFIST_CONNECTERR);
 #elif defined(MYNUM)
         uint32_t tm;
         memcpy(&tm, data+17, sizeof(tm));
@@ -63,10 +59,8 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
         strcpy_P(reinterpret_cast<char*>(data), PSTR("slave-flylight"));
         data[15] = MYNUM;
         esp_now_send(mac, data, 16);
-        if (state == WIFIST_INITOK) {
-            state = WIFIST_CONNECTOK;
-            wifiModUpd();
-        }
+        if (state == WIFIST_INITOK)
+            wifiState(WIFIST_CONNECTOK);
         beaclast = millis();
         
 #endif
@@ -78,11 +72,9 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
         uint8_t num = _data[15];
         if ((num > 0) && (num <= MAXNUM)) {
             auto &p = peer[num-1];
-            if (p.connected && (memcmp(p.mac, mac, sizeof(p.mac)) != 0)) {
+            if (p.connected && (memcmp(p.mac, mac, sizeof(p.mac)) != 0))
                 // mac пира изменился
-                state = WIFIST_CONNECTERR;
-                wifiModUpd();
-            }
+                wifiState(WIFIST_CONNECTERR);
             else {
                 if (!p.connected) {
                     p.connected = true;
@@ -93,8 +85,7 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
         }
 #elif defined(MYNUM)
         // Для любого слейва получение такого пакета = ошибка
-        state = WIFIST_CONNECTERR;
-        wifiModUpd();
+        wifiState(WIFIST_CONNECTERR);
 #endif
     }
 
@@ -128,14 +119,10 @@ void wifiInit() {
     if ((esp_now_init() == ESP_OK) &&
         (esp_now_set_self_role(ESP_NOW_ROLE_COMBO) == ESP_OK) &&
         (esp_now_register_recv_cb(wifirecv) == ESP_OK)
-        ) {
-        state = WIFIST_INITOK;
-    }
-    else {
-        state = WIFIST_INITERR;
-    }
-    
-    wifiModUpd();
+        )
+        wifiState(WIFIST_INITOK);
+    else
+        wifiState(WIFIST_INITERR);
 }
 
 void wifiDisable() {
@@ -144,15 +131,8 @@ void wifiDisable() {
     state = WIFIST_NONE;
 }
 
-void wifiModUpd() {
-    switch (state) {
-        case WIFIST_NONE:       ledMonSet(LEDMON_NONE);         return;
-        case WIFIST_INITERR:    ledMonSet(ERR_WIFIINIT);        return;
-        case WIFIST_INITOK:     ledMonSet(ctrlMode() > CTRL_GND ? STATE_SKYOK       : STATE_WIFIOK);        return;
-        case WIFIST_CONNECTERR: ledMonSet(ERR_WIFICONNECT);     return;
-        case WIFIST_CONNECTOK:  ledMonSet(ctrlMode() > CTRL_GND ? STATE_SKYCONNECT  : STATE_WIFICONNECT);   return;
-        case WIFIST_CONNECTALL: ledMonSet(ctrlMode() > CTRL_GND ? STATE_SKYALL      : STATE_WIFIALL);       return;
-    }
+wifi_state_t wifiState() {
+    return state;
 }
 
 
@@ -199,16 +179,14 @@ void wifiProcess() {
     if ((state == WIFIST_INITOK) || (state == WIFIST_CONNECTOK) || (state == WIFIST_CONNECTALL)) {
         auto st = connected == MAXNUM ? WIFIST_CONNECTALL : connected > 0 ? WIFIST_CONNECTOK : WIFIST_INITOK;
         if (state != st) {
-            state = st;
-            wifiModUpd();
+            wifiState(st);
         }
     }
 #elif defined(MYNUM)
     if ((state == WIFIST_INITOK) || (state == WIFIST_CONNECTOK)) {
         auto st = (beaclast+(64*WIFI_UPD_INTERVAL*3)) > millis() ? WIFIST_CONNECTOK : WIFIST_INITOK;
         if (state != st) {
-            state = st;
-            wifiModUpd();
+            wifiState(st);
             if (st != WIFIST_CONNECTOK)
                 ledExtDisconnect();
         }

@@ -4,6 +4,7 @@
 #include "../def.h"
 
 #include "ledext.h"
+#include "ledmon.h"
 #include "button.h"
 #include "power.h"
 #include "wifi.h"
@@ -20,7 +21,58 @@ static ctrl_mode_t mode = CTRL_INIT;
  * Базовые функции
  * ------------------------------------------------------------------------------------------- */
 
-static void ctrlUpdate(ctrl_mode_t _mode);
+
+
+static void ctrlMonLed() {
+    if (mode == CTRL_INIT) {
+        ledMonSet(LEDMON_OK3);
+        return;
+    }
+    
+    switch (wifiState()) {
+        case WIFIST_NONE:       ledMonSet(LEDMON_OK3);         return;
+        case WIFIST_INITERR:    ledMonSet(ERR_WIFIINIT);        return;
+        case WIFIST_INITOK:     ledMonSet(mode > CTRL_GND ? STATE_SKYOK       : STATE_WIFIOK);        return;
+        case WIFIST_CONNECTERR: ledMonSet(ERR_WIFICONNECT);     return;
+        case WIFIST_CONNECTOK:  ledMonSet(mode > CTRL_GND ? STATE_SKYCONNECT  : STATE_WIFICONNECT);   return;
+        case WIFIST_CONNECTALL: ledMonSet(mode > CTRL_GND ? STATE_SKYALL      : STATE_WIFIALL);       return;
+    }
+}
+
+static void ctrlAltMode(ctrl_mode_t _mode) {
+    switch (_mode) {
+        case CTRL_GND:
+            btnHnd(BTN_SIMPLE, ledExtNextGnd);
+            btnHnd(BTN_LONG, pwrOffBegin);
+            break;
+            
+        case CTRL_TOFF:
+            btnHnd(BTN_SIMPLE, ledExtNextTOff);
+            btnHnd(BTN_LONG, NULL);
+            break;
+            
+        case CTRL_FFALL:
+            btnHnd(BTN_SIMPLE, ledExtNextFFall);
+            btnHnd(BTN_LONG, NULL);
+            break;
+            
+        case CTRL_BREAKOFF:
+            btnHnd(BTN_SIMPLE, NULL);
+            btnHnd(BTN_LONG, NULL);
+            break;
+            
+        case CTRL_CNP:
+            btnHnd(BTN_SIMPLE, NULL);
+            btnHnd(BTN_LONG, NULL);
+            break;
+    }
+    
+    mode = _mode;
+    
+    ledExtSet(LEDEXT_AUTO);
+    ctrlMonLed();
+}
+
 
 void ctrlInit() {
     bmpok = bme.begin(BMP280_ADDRESS_ALT);
@@ -58,7 +110,7 @@ void ctrlProcess() {
     }
     
     if (mode1 != mode)
-        ctrlUpdate(mode1);
+        ctrlAltMode(mode1);
 }
 
 
@@ -66,41 +118,6 @@ ctrl_mode_t ctrlMode() {
     return mode;
 }
 
-static void ctrlUpdate(ctrl_mode_t _mode) {
-    switch (_mode) {
-        case CTRL_GND:
-            btnHnd(BTN_SIMPLE, ledExtNextGnd);
-            btnHnd(BTN_LONG, pwrOffBegin);
-            wifiModUpd();
-            break;
-            
-        case CTRL_TOFF:
-            btnHnd(BTN_SIMPLE, ledExtNextTOff);
-            btnHnd(BTN_LONG, NULL);
-            break;
-            
-        case CTRL_FFALL:
-            btnHnd(BTN_SIMPLE, ledExtNextFFall);
-            btnHnd(BTN_LONG, NULL);
-            break;
-            
-        case CTRL_BREAKOFF:
-            btnHnd(BTN_SIMPLE, NULL);
-            btnHnd(BTN_LONG, NULL);
-            break;
-            
-        case CTRL_CNP:
-            btnHnd(BTN_SIMPLE, NULL);
-            btnHnd(BTN_LONG, NULL);
-            break;
-    }
-    
-    ledExtSet(LEDEXT_AUTO);
-    wifiModUpd();
-    
-    mode = _mode;
-}
-
 void ctrlUpdate() {
-    ctrlUpdate(mode);
+    ctrlAltMode(mode);
 }
