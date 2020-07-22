@@ -74,7 +74,6 @@ static void ctrlAltMode(ctrl_mode_t _mode) {
     
     mode = _mode;
     
-    ledExtSet(LEDEXT_AUTO);
     ctrlMonLed();
 }
 
@@ -120,8 +119,10 @@ void ctrlProcess() {
             mode1 = CTRL_FFALL;
     }
     
-    if (mode1 != mode)
+    if (mode1 != mode) {
         ctrlAltMode(mode1);
+        ledExtSet((mode == CTRL_INIT) && (mode1 == CTRL_GND) ? LEDEXT_NONE : LEDEXT_AUTO);
+    }
 }
 
 
