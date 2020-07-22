@@ -93,19 +93,19 @@ void ctrlProcess() {
     if (ac.alt() < 40)
         mode1 = CTRL_GND;
     else if (ac.alt() < 800) {
-        if ((mode == CTRL_GND) || ((ac.direct() == ACDIR_UP) && (ac.speed() > 1)))
+        if ((mode == CTRL_GND) || ((ac.direct() == ACDIR_UP) && (ac.dircnt() > 40) && (ac.speed() > 2)))
             mode1 = CTRL_TOFF;
         else
-        if ((ac.direct() == ACDIR_DOWN) && (ac.speed() > 4))
+        if ((ac.direct() == ACDIR_DOWN) && (ac.dircnt() > 40) && (ac.speed() > 4))
             mode1 = CTRL_CNP;
     }
     else
     if (ac.alt() < 1400) {
-        if ((ac.direct() == ACDIR_DOWN) && (ac.speed() > 10))
+        if ((ac.direct() == ACDIR_DOWN) && (ac.dircnt() > 40) && (ac.speed() > 10))
             mode1 = CTRL_BREAKOFF;
     }
     else {
-        if ((ac.direct() == ACDIR_DOWN) && (ac.speed() > 10))
+        if ((ac.direct() == ACDIR_DOWN) && (ac.dircnt() > 40) && (ac.speed() > 10))
             mode1 = CTRL_FFALL;
     }
     
