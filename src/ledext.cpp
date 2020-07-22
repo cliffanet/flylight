@@ -146,8 +146,11 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
 }
 
 void ledExtNextGnd() {
+    if (mode == LEDEXT_NONE)
+        ledExtSet(LEDEXT_AUTO);
+    else
     if ((mode < LEDEXT_AUTO) || ((mode+1)>=LEDEXT_OUTMAX))
-        ledExtSet(static_cast<ledext_mode_t>(LEDEXT_AUTO));
+        ledExtSet(LEDEXT_NONE);
     else
         ledExtSet(static_cast<ledext_mode_t>(mode+1));
     
