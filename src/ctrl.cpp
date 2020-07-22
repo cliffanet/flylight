@@ -28,6 +28,11 @@ static void ctrlMonLed() {
         ledMonSet(LEDMON_OK3);
         return;
     }
+    else
+    if (mode == CTRL_ALTERR) {
+        ledMonSet(LEDMON_ERR4);
+        return;
+    }
     
     switch (wifiState()) {
         case WIFIST_NONE:       ledMonSet(LEDMON_OK3);         return;
@@ -76,17 +81,23 @@ static void ctrlAltMode(ctrl_mode_t _mode) {
 
 void ctrlInit() {
     bmpok = bme.begin(BMP280_ADDRESS_ALT);
+    if (!bmpok)
+        ctrlAltMode(CTRL_ALTERR);
 }
 
 void ctrlProcess() {
     if (!bmpok)
         return;
     
-    ac.tick(bme.readPressure());
+    float press;
+    ac.tick(press = bme.readPressure());
     
     // выясняем актуальный режим в зависимости от высоты
     ctrl_mode_t mode1 = mode;
     
+    if (press == 0)
+        mode1 = CTRL_ALTERR;
+    else
     if ((ac.state() == ACST_INIT) || (ac.direct() == ACDIR_INIT))
         mode1 = CTRL_INIT;
     else

@@ -7,6 +7,7 @@
 
 typedef enum {
     CTRL_INIT = 0,
+    CTRL_ALTERR,
     CTRL_GND,
     CTRL_TOFF,
     CTRL_FFALL,

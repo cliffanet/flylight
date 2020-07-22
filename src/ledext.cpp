@@ -78,7 +78,8 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
                     ledSet(LED_EXT3, NULL);
                     ledSet(LED_EXT4, NULL);
                     return;
-                
+
+                case CTRL_ALTERR:
                 case CTRL_GND:
                 case CTRL_FFALL:
                 case CTRL_BREAKOFF:
