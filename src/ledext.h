@@ -17,11 +17,11 @@ typedef enum {
     LEDEXT_MINI,
     LEDEXT_AUTO,
     LEDEXT_STAR,
+    LEDEXT_CLOCKIN,
+    LEDEXT_OUTMAX,
     LEDEXT_CLOCKTST1,
     LEDEXT_CLOCKTST4,
-    LEDEXT_CLOCKIN,
-    LEDEXT_CLOCKOUT,
-    LEDEXT_OUTMAX
+    LEDEXT_CLOCKOUT
 } ledext_mode_t;
 
 bool ledExtGet(ledext_mode_t &mode, uint32_t &tm);

@@ -156,7 +156,7 @@ void ledExtNextGnd() {
         ledExtSet(static_cast<ledext_mode_t>(mode+1));
     
 #if defined(MYNUM) && (MYNUM == 0)
-    wifiSendLight(mode);
+    wifiSendLight(mode, millis() - beg);
 #endif
 }
 
@@ -171,7 +171,7 @@ void ledExtNextFFall() {
         ledExtSet(static_cast<ledext_mode_t>(mode+1));
 
 #if defined(MYNUM) && (MYNUM == 0)
-    wifiSendLight(mode);
+    wifiSendLight(mode, millis() - beg);
 #endif
 }
 

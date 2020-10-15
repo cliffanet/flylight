@@ -25,7 +25,7 @@ wifi_state_t wifiState();
 void wifiProcess();
 
 #if defined(MYNUM) && (MYNUM == 0)
-void wifiSendLight(uint8_t mode);
+void wifiSendLight(uint8_t mode, uint32_t tm);
 #endif
 
 #endif // _wifi_H

@@ -52,7 +52,8 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
 #elif defined(MYNUM)
         uint32_t tm;
         memcpy(&tm, data+17, sizeof(tm));
-        ledExtSet(static_cast<ledext_mode_t>(data[16]), ntohl(tm));
+        if (ctrlMode() == CTRL_FFALL)
+            ledExtSet(static_cast<ledext_mode_t>(data[16]), ntohl(tm));
         
         // Для любого слейва сверяем мак головного
         uint8_t data[20];
@@ -91,10 +92,11 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
 
 #if defined(MYNUM) && (MYNUM > 0)
     else
-    if ((len == 15) && (strncmp_P(data, PSTR("mode-flylight"), 13) == 0)) {
+    if ((len == 19) && (strncmp_P(data, PSTR("mode-flylight"), 13) == 0)) {
         uint8_t mode = data[14];
-        if (mode >= LEDEXT_AUTO)
-            ledExtSet(static_cast<ledext_mode_t>(mode));
+        uint32_t tm;
+        memcpy(&tm, data+15, sizeof(tm));
+        ledExtSet(static_cast<ledext_mode_t>(mode), ntohl(tm));
     }
 #endif
 }
@@ -196,10 +198,12 @@ void wifiProcess() {
 
 
 #if defined(MYNUM) && (MYNUM == 0)
-void wifiSendLight(uint8_t mode) {
+void wifiSendLight(uint8_t mode, uint32_t tm) {
     uint8_t data[20];
     strncpy_P(reinterpret_cast<char*>(data), PSTR("mode-flylight"), sizeof(data));
     data[14] = mode;
-    sndbcast(data, 15);
+    tm = htonl(tm > 20 ? tm-20 : 0);
+    memcpy(data+15, &tm, sizeof(tm));
+    sndbcast(data, 19);
 }
 #endif
