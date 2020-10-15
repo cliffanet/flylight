@@ -52,8 +52,7 @@ static void wifirecv(uint8_t *mac, uint8_t *_data, uint8_t len) {
 #elif defined(MYNUM)
         uint32_t tm;
         memcpy(&tm, data+17, sizeof(tm));
-        if (ctrlMode() == CTRL_FFALL)
-            ledExtSet(static_cast<ledext_mode_t>(data[16]), ntohl(tm));
+        ledExtRoot(static_cast<ledext_mode_t>(data[16]), ntohl(tm));
         
         // Для любого слейва сверяем мак головного
         uint8_t data[20];

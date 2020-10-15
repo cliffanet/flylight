@@ -2,9 +2,7 @@
 #include "ledext.h"
 #include "led.h"
 #include "ctrl.h"
-#if defined(MYNUM) && (MYNUM == 0)
 #include "wifi.h"
-#endif
 
 
 /* ------------------------------------------------------------------------------------------- *
@@ -40,6 +38,11 @@ static const ledarr_t led_clock6 = {
 
 static ledext_mode_t mode = LEDEXT_NONE;
 static uint32_t beg = 0;
+
+#if defined(MYNUM) && (MYNUM > 0)
+static ledext_mode_t moderoot = LEDEXT_NONE;
+static uint32_t begroot = 0;
+#endif
 
 bool ledExtGet(ledext_mode_t &_mode, uint32_t &tm) {
     _mode = mode;
@@ -155,28 +158,49 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
     }
 }
 
+#if defined(MYNUM) && (MYNUM > 0)
+void ledExtRoot(ledext_mode_t _mode, uint32_t tm) {
+    moderoot = _mode;
+    begroot = millis()-tm;
+
+    switch (ctrlMode()) {
+        case CTRL_FFALL:
+            ledExtSet(_mode, tm);
+            break;
+        case CTRL_GND:
+            if (wifiState() != WIFIST_CONNECTOK)
+                ledExtSet(_mode, tm);
+            break;
+    }
+}
+#endif
+
 void ledExtAltChg() {
     switch (ctrlMode()) {
-        CTRL_INIT:
-        CTRL_ALTERR:
+        case CTRL_INIT:
+        case CTRL_ALTERR:
             ledExtSet(LEDEXT_FULL);
             break;
             
-        CTRL_GND:
+        case CTRL_GND:
             if (ctrlModePrev() == CTRL_INIT)
+#if defined(MYNUM) && (MYNUM == 0)
                 ledExtSet(LEDEXT_NONE);
+#elif defined(MYNUM)
+                ledExtSet(moderoot, millis()-begroot);
+#endif
             break;
             
-        CTRL_TOFF:
+        case CTRL_TOFF:
             ledExtSet(LEDEXT_NONE);
             break;
         
-        CTRL_FFALL:
-        CTRL_BREAKOFF:
+        case CTRL_FFALL:
+        case CTRL_BREAKOFF:
             ledExtSet(LEDEXT_FULL);
             break;
         
-        CTRL_CNP:
+        case CTRL_CNP:
             ledExtSet(LEDEXT_CNP);
             break;
     }
@@ -234,18 +258,7 @@ void ledExtNextFFall() {
 #endif
 }
 
-void ledExtConnect(ledext_mode_t _mode, uint32_t tm) {
-    switch (ctrlMode()) {
-        CTRL_INIT:
-        CTRL_ALTERR:
-        CTRL_TOFF:
-        CTRL_BREAKOFF:
-        CTRL_CNP:
-            return;
-    }
-    ledExtSet(_mode, tm);
-}
-
 void ledExtDisconnect() {
-    ledExtSet(LEDEXT_FULL);
+    if ((ctrlMode() == CTRL_FFALL) && (mode != LEDEXT_FULL))
+        ledExtSet(LEDEXT_FULL);
 }

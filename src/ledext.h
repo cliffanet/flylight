@@ -30,11 +30,13 @@ typedef enum {
 
 bool ledExtGet(ledext_mode_t &mode, uint32_t &tm);
 void ledExtSet(ledext_mode_t _mode, uint32_t tm = 0);
+#if defined(MYNUM) && (MYNUM > 0)
+void ledExtRoot(ledext_mode_t _mode, uint32_t tm = 0);
+#endif
 void ledExtAltChg();
 void ledExtNextGnd();
 void ledExtNextTOff();
 void ledExtNextFFall();
-void ledExtConnect(ledext_mode_t _mode, uint32_t tm = 0);
 void ledExtDisconnect();
 
 #endif // _ledext_H
