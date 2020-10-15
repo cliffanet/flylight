@@ -24,6 +24,9 @@ static const ledarr_t led_star1 = {
 static const ledarr_t led_star2 = {
     0b00111100, 0b00000011, 0b11000000, 0b00111100, 0b00000011, 0b11000000, 0b00111100, 0b00000000
 };
+static const ledarr_t led_star3 = {
+    0b11110000, 0b00000000, 0b00000000, 0b00000000, 0b11110000, 0b00000000, 0b00000000, 0b00000000
+};
 
 static const ledarr_t led_clock3 = {
     //0b11110000, 0b00001111, 0b00000000, 0b11110000, 0b00001111, 0b00000000, 0b11110000, 0b00000000
@@ -41,14 +44,14 @@ static uint32_t beg = 0;
 bool ledExtGet(ledext_mode_t &_mode, uint32_t &tm) {
     _mode = mode;
     
-    if (mode < LEDEXT_AUTO) {
+    if (mode <= LEDEXT_FULL) {
         tm = 0;
         return false;
     }
     
     tm = millis() - beg;
     
-    return mode >= LEDEXT_AUTO;
+    return mode > LEDEXT_FULL;
 }
 
 void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
@@ -69,39 +72,45 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
             ledSet(LED_EXT4, NULL);
             return;
             
-        case LEDEXT_AUTO:
-            switch (ctrlMode()) {
-                case CTRL_INIT:
-                case CTRL_TOFF:
-                    ledSet(LED_EXT1, NULL);
-                    ledSet(LED_EXT2, NULL);
-                    ledSet(LED_EXT3, NULL);
-                    ledSet(LED_EXT4, NULL);
-                    return;
-
-                case CTRL_ALTERR:
-                case CTRL_GND:
-                case CTRL_FFALL:
-                case CTRL_BREAKOFF:
-                    ledSet(LED_EXT1, led_solid);
-                    ledSet(LED_EXT2, led_solid);
-                    ledSet(LED_EXT3, led_solid);
-                    ledSet(LED_EXT4, led_solid);
-                    return;
-                    
-                case CTRL_CNP:
-                    ledSet(LED_EXT1, led_solid);
-                    ledSet(LED_EXT2, led_cnp);
-                    ledSet(LED_EXT3, led_cnp);
-                    ledSet(LED_EXT4, led_solid);
-                    return;
-            }
-            
-        case LEDEXT_STAR:
+        case LEDEXT_FULL:
+        case LEDEXT_EVOLUTION:
+        case LEDEXT_BREAKOFF:
+            ledSet(LED_EXT1, led_solid);
+            ledSet(LED_EXT2, led_solid);
+            ledSet(LED_EXT3, led_solid);
+            ledSet(LED_EXT4, led_solid);
+            return;
+        
+        case LEDEXT_CNP:
+            ledSet(LED_EXT1, led_solid);
+            ledSet(LED_EXT2, led_cnp);
+            ledSet(LED_EXT3, led_cnp);
+            ledSet(LED_EXT4, led_solid);
+            return;
+        
+        case LEDEXT_STARCIRCLE:
             ledSet(LED_EXT1, led_star1, tm);
             ledSet(LED_EXT2, led_star2, tm);
             ledSet(LED_EXT3, led_star2, tm);
             ledSet(LED_EXT4, led_star1, tm);
+            return;
+
+#if defined(MYNUM) && (MYNUM == 0)
+#define SNUMTOP 16
+#define SNUMBOT 0
+#elif defined(MYNUM) && ((MYNUM == 1) || (MYNUM == 2))
+#define SNUMTOP 18
+#define SNUMBOT 2
+#elif defined(MYNUM)
+#define SNUMTOP 20
+#define SNUMBOT 4
+#endif
+            
+        case LEDEXT_STARLOOP:
+            ledSet(LED_EXT1, led_star3, tm, SNUMTOP);
+            ledSet(LED_EXT2, led_star3, tm, SNUMBOT);
+            ledSet(LED_EXT3, led_star3, tm, SNUMBOT);
+            ledSet(LED_EXT4, led_star3, tm, SNUMTOP);
             return;
 
 #if defined(MYNUM) && (MYNUM == 0)
@@ -146,14 +155,54 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
     }
 }
 
+void ledExtAltChg() {
+    switch (ctrlMode()) {
+        CTRL_INIT:
+        CTRL_ALTERR:
+            ledExtSet(LEDEXT_FULL);
+            break;
+            
+        CTRL_GND:
+            if (ctrlModePrev() == CTRL_INIT)
+                ledExtSet(LEDEXT_NONE);
+            break;
+            
+        CTRL_TOFF:
+            ledExtSet(LEDEXT_NONE);
+            break;
+        
+        CTRL_FFALL:
+        CTRL_BREAKOFF:
+            ledExtSet(LEDEXT_FULL);
+            break;
+        
+        CTRL_CNP:
+            ledExtSet(LEDEXT_CNP);
+            break;
+    }
+}
+
 void ledExtNextGnd() {
-    if (mode == LEDEXT_NONE)
-        ledExtSet(LEDEXT_AUTO);
-    else
-    if ((mode < LEDEXT_AUTO) || ((mode+1)>=LEDEXT_OUTMAX))
-        ledExtSet(LEDEXT_NONE);
-    else
-        ledExtSet(static_cast<ledext_mode_t>(mode+1));
+    switch (mode) {
+        case LEDEXT_NONE:
+            ledExtSet(LEDEXT_FULL);
+            break;
+        case LEDEXT_FULL:
+            ledExtSet(LEDEXT_STARCIRCLE);
+            break;
+        case LEDEXT_STARCIRCLE:
+            ledExtSet(LEDEXT_EVOLUTION);
+            break;
+        case LEDEXT_EVOLUTION:
+            ledExtSet(LEDEXT_STARLOOP);
+            break;
+        case LEDEXT_STARLOOP:
+            ledExtSet(LEDEXT_BREAKOFF);
+            break;
+        case LEDEXT_BREAKOFF:
+            ledExtSet(LEDEXT_NONE);
+            break;
+    }
     
 #if defined(MYNUM) && (MYNUM == 0)
     wifiSendLight(mode, millis() - beg);
@@ -161,23 +210,42 @@ void ledExtNextGnd() {
 }
 
 void ledExtNextTOff() {
-    ledExtSet(mode == LEDEXT_AUTO ? LEDEXT_MINI : LEDEXT_AUTO);
+    ledExtSet(mode == LEDEXT_NONE ? LEDEXT_MINI : LEDEXT_NONE);
 }
 
 void ledExtNextFFall() {
-    if ((mode <= LEDEXT_AUTO) || ((mode+1)>=LEDEXT_OUTMAX))
-        ledExtSet(static_cast<ledext_mode_t>(LEDEXT_AUTO+1));
-    else
-        ledExtSet(static_cast<ledext_mode_t>(mode+1));
+    switch (mode) {
+        case LEDEXT_FULL:
+            ledExtSet(LEDEXT_STARCIRCLE);
+            break;
+        case LEDEXT_STARCIRCLE:
+            ledExtSet(LEDEXT_EVOLUTION);
+            break;
+        case LEDEXT_EVOLUTION:
+            ledExtSet(LEDEXT_STARLOOP);
+            break;
+        case LEDEXT_STARLOOP:
+            ledExtSet(LEDEXT_FULL);
+            break;
+    }
 
 #if defined(MYNUM) && (MYNUM == 0)
     wifiSendLight(mode, millis() - beg);
 #endif
 }
 
+void ledExtConnect(ledext_mode_t _mode, uint32_t tm) {
+    switch (ctrlMode()) {
+        CTRL_INIT:
+        CTRL_ALTERR:
+        CTRL_TOFF:
+        CTRL_BREAKOFF:
+        CTRL_CNP:
+            return;
+    }
+    ledExtSet(_mode, tm);
+}
+
 void ledExtDisconnect() {
-    if (mode <= LEDEXT_AUTO)
-        return;
-    
-    ledExtSet(LEDEXT_AUTO);
+    ledExtSet(LEDEXT_FULL);
 }

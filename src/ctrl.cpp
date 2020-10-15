@@ -16,6 +16,7 @@ static Adafruit_BMP280 bme; // hardware Wire
 static altcalc ac;
 static bool bmpok = false;
 static ctrl_mode_t mode = CTRL_INIT;
+static ctrl_mode_t mprev = CTRL_INIT;
 
 /* ------------------------------------------------------------------------------------------- *
  * Базовые функции
@@ -72,6 +73,7 @@ static void ctrlAltMode(ctrl_mode_t _mode) {
             break;
     }
     
+    mprev = mode;
     mode = _mode;
     
     ctrlMonLed();
@@ -110,7 +112,7 @@ void ctrlProcess() {
             mode1 = CTRL_CNP;
     }
     else
-    if (ac.alt() < 1400) {
+    if (ac.alt() < 1300) {
         if ((ac.direct() == ACDIR_DOWN) && (ac.dircnt() > 40) && (ac.speed() > 10))
             mode1 = CTRL_BREAKOFF;
     }
@@ -121,13 +123,16 @@ void ctrlProcess() {
     
     if (mode1 != mode) {
         ctrlAltMode(mode1);
-        ledExtSet((mode == CTRL_INIT) && (mode1 == CTRL_GND) ? LEDEXT_NONE : LEDEXT_AUTO);
+        ledExtAltChg();
     }
 }
 
 
 ctrl_mode_t ctrlMode() {
     return mode;
+}
+ctrl_mode_t ctrlModePrev() {
+    return mprev;
 }
 
 void ctrlUpdate() {
