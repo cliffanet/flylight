@@ -20,6 +20,7 @@ void ctrlProcess();
 
 ctrl_mode_t ctrlMode();
 ctrl_mode_t ctrlModePrev();
+float ctrlAlt();
 void ctrlUpdate();
 
 #endif // _ctrl_H

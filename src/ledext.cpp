@@ -234,7 +234,16 @@ void ledExtNextGnd() {
 }
 
 void ledExtNextTOff() {
-    ledExtSet(mode == LEDEXT_NONE ? LEDEXT_MINI : LEDEXT_NONE);
+    if (ctrlAlt() < 1850)
+        ledExtSet(mode == LEDEXT_NONE ? LEDEXT_MINI : LEDEXT_NONE);
+    else {
+#if defined(MYNUM) && (MYNUM == 0)
+        ledExtSet(mode == LEDEXT_NONE ? LEDEXT_MINI : LEDEXT_NONE);
+        wifiSendLight(mode, millis() - beg);
+#elif defined(MYNUM)
+        ledExtSet(mode == LEDEXT_NONE ? moderoot : LEDEXT_NONE);
+#endif 
+    }
 }
 
 void ledExtNextFFall() {

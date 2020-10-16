@@ -135,6 +135,10 @@ ctrl_mode_t ctrlModePrev() {
     return mprev;
 }
 
+float ctrlAlt() {
+    return ac.alt();
+}
+
 void ctrlUpdate() {
     ctrlAltMode(mode);
 }
