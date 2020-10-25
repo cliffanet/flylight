@@ -23,7 +23,7 @@ static const ledarr_t led_star2 = {
     0b00111100, 0b00000011, 0b11000000, 0b00111100, 0b00000011, 0b11000000, 0b00111100, 0b00000000
 };
 static const ledarr_t led_star3 = {
-    0b11110000, 0b00000000, 0b00000000, 0b00000000, 0b11110000, 0b00000000, 0b00000000, 0b00000000
+    0b11111100, 0b00000000, 0b00000000, 0b00000000, 0b11111100, 0b00000000, 0b00000000, 0b00000000
 };
 
 static const ledarr_t led_clock3 = {
@@ -102,11 +102,11 @@ void ledExtSet(ledext_mode_t _mode, uint32_t tm) {
 #define SNUMTOP 16
 #define SNUMBOT 0
 #elif defined(MYNUM) && ((MYNUM == 1) || (MYNUM == 2))
-#define SNUMTOP 18
-#define SNUMBOT 2
-#elif defined(MYNUM)
 #define SNUMTOP 20
 #define SNUMBOT 4
+#elif defined(MYNUM)
+#define SNUMTOP 24
+#define SNUMBOT 8
 #endif
             
         case LEDEXT_STARLOOP:
@@ -226,6 +226,9 @@ void ledExtNextGnd() {
         case LEDEXT_BREAKOFF:
             ledExtSet(LEDEXT_NONE);
             break;
+        default:
+            ledExtSet(LEDEXT_NONE);
+            break;
     }
     
 #if defined(MYNUM) && (MYNUM == 0)
@@ -258,6 +261,9 @@ void ledExtNextFFall() {
             ledExtSet(LEDEXT_STARLOOP);
             break;
         case LEDEXT_STARLOOP:
+            ledExtSet(LEDEXT_FULL);
+            break;
+        default:
             ledExtSet(LEDEXT_FULL);
             break;
     }

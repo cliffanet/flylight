@@ -11,6 +11,6 @@
 
 #define MYNUM       0
 
-#define MAXNUM      2
+#define MAXNUM      5
 
 #endif // _def_H
